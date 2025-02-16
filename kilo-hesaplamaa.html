@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kilo Hesaplama Aracı</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #fff;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+            max-width: 500px;
+            width: 100%;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: #fff;
+        }
+        label {
+            display: block;
+            margin: 15px 0 5px;
+            font-size: 1.1rem;
+            color: #fff;
+        }
+        input, select {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
+        input::placeholder, select {
+            color: #ddd;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        button:hover {
+            background: #218838;
+        }
+        .result {
+            margin-top: 25px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: #fff;
+            display: none;
+            animation: fadeIn 1s ease;
+        }
+        .result h2 {
+            margin-top: 0;
+        }
+        .chart {
+            width: 100%;
+            height: 150px;
+            margin-top: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+        .chart div {
+            height: 100%;
+            display: inline-block;
+            transition: width 0.5s ease;
+        }
+        .protein { background: #ff6f61; }
+        .carbs { background: #6b5b95; }
+        .fat { background: #88b04b; }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Kilo Hesaplama Aracı</h1>
+        <form id="calculatorForm">
+            <label for="age">Yaş:</label>
+            <input type="number" id="age" placeholder="Örnek: 27" required>
+
+            <label for="gender">Cinsiyet:</label>
+            <select id="gender" required>
+                <option value="male">Erkek</option>
+                <option value="female">Kadın</option>
+            </select>
+
+            <label for="weight">Kilo (kg):</label>
+            <input type="number" id="weight" placeholder="Örnek: 75" required>
+
+            <label for="height">Boy (cm):</label>
+            <input type="number" id="height" placeholder="Örnek: 165" required>
+
+            <label for="activity">Aktivite Seviyesi:</label>
+            <select id="activity" required>
+                <option value="1.2">Hareketsiz</option>
+                <option value="1.375">Hafif Aktif</option>
+                <option value="1.55">Orta Aktif</option>
+                <option value="1.725">Çok Aktif</option>
+                <option value="1.9">Aşırı Aktif</option>
+            </select>
+
+            <label for="goal">Hedef:</label>
+            <select id="goal" required>
+                <option value="loss">Yağ Yakma</option>
+                <option value="maintain">Kilo Koruma</option>
+                <option value="gain">Kas Yapma</option>
+            </select>
+
+            <button type="submit">Hesapla</button>
+        </form>
+
+        <div class="result" id="result">
+            <h2>Sonuçlar:</h2>
+            <p><strong>BMR (Bazal Metabolizma Hızı):</strong> <span id="bmr"></span> kcal</p>
+            <p><strong>Günlük Kalori İhtiyacı:</strong> <span id="calories"></span> kcal</p>
+            <p><strong>Protein:</strong> <span id="protein"></span> gram</p>
+            <p><strong>Karbonhidrat:</strong> <span id="carbs"></span> gram</p>
+            <p><strong>Yağ:</strong> <span id="fat"></span> gram</p>
+            <div class="chart">
+                <div class="protein" id="proteinChart"></div>
+                <div class="carbs" id="carbsChart"></div>
+                <div class="fat" id="fatChart"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('calculatorForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            // Değerleri al
+            const age = parseInt(document.getElementById('age').value);
+            const gender = document.getElementById('gender').value;
+            const weight = parseFloat(document.getElementById('weight').value);
+            const height = parseFloat(document.getElementById('height').value);
+            const activity = parseFloat(document.getElementById('activity').value);
+            const goal = document.getElementById('goal').value;
+
+            // BMR hesapla
+            let bmr;
+            if (gender === 'male') {
+                bmr = 10 * weight + 6.25 * height - 5 * age + 5;
+            } else {
+                bmr = 10 * weight + 6.25 * height - 5 * age - 161;
+            }
+
+            // Günlük kalori ihtiyacı
+            let dailyCalories = bmr * activity;
+
+            // Hedefe göre kalori ayarla
+            if (goal === 'loss') {
+                dailyCalories -= 500; // Yağ yakma
+            } else if (goal === 'gain') {
+                dailyCalories += 500; // Kas yapma
+            }
+
+            // Makro besin dağılımı
+            const protein = (weight * 1.8).toFixed(2); // Kilo başına 1.8 gram protein
+            const carbs = (dailyCalories * 0.4 / 4).toFixed(2); // %40 karbonhidrat
+            const fat = (dailyCalories * 0.25 / 9).toFixed(2); // %25 yağ
+
+            // Sonuçları göster
+            document.getElementById('bmr').textContent = bmr.toFixed(2);
+            document.getElementById('calories').textContent = dailyCalories.toFixed(2);
+            document.getElementById('protein').textContent = protein;
+            document.getElementById('carbs').textContent = carbs;
+            document.getElementById('fat').textContent = fat;
+
+            // Grafik güncelleme
+            const proteinChart = document.getElementById('proteinChart');
+            const carbsChart = document.getElementById('carbsChart');
+            const fatChart = document.getElementById('fatChart');
+
+            proteinChart.style.width = `${(protein / 200) * 100}%`;
+            carbsChart.style.width = `${(carbs / 300) * 100}%`;
+            fatChart.style.width = `${(fat / 100) * 100}%`;
+
+            // Sonuçları göster
+            document.getElementById('result').style.display = 'block';
+        });
+    </script>
+</body>
+</html>
